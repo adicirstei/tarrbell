@@ -7,10 +7,13 @@ I wrote [a blog post](http://www.cirstei.ro/generative-art-in-haskell/) about th
 ## Some images I produced with these algorithms
 
 Binary Ring
+
 ![BinaryRing](images/BinaryRing-1526389380167-15606.png)
 
 Substrate
+
 ![Substrate](images/Substrate-1526387020654-11128.png)
 
 Bubble Chamber
+
 ![BubbleChamber](images/BubbleChamber-1526387020654-43929.png)
