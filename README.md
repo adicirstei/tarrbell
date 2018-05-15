@@ -8,12 +8,12 @@ I wrote [a blog post](http://www.cirstei.ro/generative-art-in-haskell/) about th
 
 Binary Ring
 
-![BinaryRing](images/BinaryRing-1526389380167-15606.png)
+![BinaryRing](images/BinaryRing-1526389380167-15606.png "Binary Ring")
 
 Substrate
 
-![Substrate](images/Substrate-1526387020654-11128.png)
+![Substrate](images/Substrate-1526387020654-11128.png "Substrate")
 
 Bubble Chamber
 
-![BubbleChamber](images/BubbleChamber-1526387020654-43929.png)
+![BubbleChamber](images/BubbleChamber-1526387020654-43929.png "Bubble Chamber")
