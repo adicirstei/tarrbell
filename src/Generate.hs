@@ -1,18 +1,19 @@
-{-# LANGUAGE RecordWildCards  #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Generate (module Generate, module Data.GI.Base) where
 
-import Data.GI.Base
+import           Control.Arrow                     ((&&&))
+import           Control.Monad.Random
+import           Control.Monad.Reader
+import           Data.Colour.RGBSpace              (RGB (..))
+import           Data.Colour.RGBSpace.HSV          (hsv)
+import           Data.GI.Base
 import           Foreign.Ptr                       (castPtr)
-import           Graphics.Rendering.Cairo.Internal (Render (runRender))
-import Graphics.Rendering.Cairo(setSourceRGBA, rectangle, fill)
-import           Graphics.Rendering.Cairo.Types    (Cairo (Cairo))
 import qualified GI.Cairo
-import           Data.Colour.RGBSpace     (RGB (..))
-import           Data.Colour.RGBSpace.HSV (hsv)
-import           Control.Arrow            ((&&&))
-import Control.Monad.Random
-import Control.Monad.Reader
+import           Graphics.Rendering.Cairo          (fill, rectangle,
+                                                    setSourceRGBA)
+import           Graphics.Rendering.Cairo.Internal (Render (runRender))
+import           Graphics.Rendering.Cairo.Types    (Cairo (Cairo))
 
 
 
@@ -24,7 +25,8 @@ data World = World
 type RandGen a = ReaderT World (Rand StdGen) a
 type ColorFn = Double -> Render()
 
-
+someColorP :: [ColorFn] -> RandGen ColorFn
+someColorP pal = uniform pal
 
 renderWithContext :: GI.Cairo.Context -> Render () -> IO ()
 renderWithContext ct r = withManagedPtr ct $ \p ->
@@ -63,5 +65,3 @@ black :: Double -> Render ()
 black = hsva 0 0 0
 
 twoPi = 2.0 * pi :: Double
-  
-  
