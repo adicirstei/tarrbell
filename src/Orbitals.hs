@@ -41,11 +41,31 @@ render m = do
   pure $ sequence rendOrbs
 
 
+sumtv :: Model -> Orbital -> Double
+sumtv m (Orbital {..}) =
+  if pid == id
+    then tv + 1
+    else tv + sumtv m (m A.! pid)
+
+
 renderOrbital :: Model -> Orbital -> RandGen (Render ())
-renderOrbital m o@(Orbital i p r t tv tvd x y d col) = do
+renderOrbital m orb@(Orbital i p r t tv tvd x' y' d col) = do
   fzx <- getRandomR(-0.22, 0.22)
   fzy <- getRandomR(-0.22, 0.22)
-  pure $ point col 0.165 (x + fzx) (y + fzy)
+  o <- getRandomR (0, twoPi)
+  o' <- getRandomR (0,1)
+  pure $ do
+    point col 0.165 (x' + fzx) (y' + fzy)
+    when (sumtv m orb < 1.00001) $ do
+      let
+        (Orbital _ _ _ _ _ _ px py _ _) = (m A.! p)
+
+        fzx = r * cos o + px
+        fzy = r * sin o + py
+        fzx' = x' + o' * (px - x')
+        fzy' = y' + o' * (py - y')
+      point col 0.07 fzx fzy
+      point black 0.07 fzx' fzy'
 
 
 renderSetup :: RandGen (Render ())

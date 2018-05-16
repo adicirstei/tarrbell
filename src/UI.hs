@@ -67,7 +67,7 @@ main name world setup model step renderModel = do
     saveImage imageRef seed name
     return False
 
-  GLib.timeoutAdd GLib.PRIORITY_DEFAULT 100 (stepAct >> yield >> #queueDraw window >> yield >>  pure True)
+  GLib.timeoutAdd GLib.PRIORITY_DEFAULT 20 (stepAct >> yield >> #queueDraw window >> yield >>  pure True)
 
   #showAll window
 
