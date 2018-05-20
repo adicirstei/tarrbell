@@ -81,3 +81,10 @@ saveImage imgRef seed name = do
   surfaceWriteToPNG srf
     $ "images/" <> name <> "-"
     <> show seed <> "-" <> show r <> ".png"
+
+basic :: ColorFn -> RandGen (Render ())
+basic c = do
+  (w,h) <- getSize
+  pure $ do
+    rectangle 0 0 (fromIntegral w ) (fromIntegral h )
+    c 1 *> fill
