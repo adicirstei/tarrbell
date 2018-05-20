@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Main where
 
 import           Control.Monad.Random
@@ -71,13 +73,14 @@ distance :: City -> City -> Double
 distance (City x y _ _ _ _ _ _) (City x' y' _ _ _ _ _ _) =
   sqrt ((x-x')*(x-x') + (y-y')*(y-y'))
 
-moveCity :: Model -> City -> City
-move m City{..} =
+--moveCity :: Model -> City -> City
+move m (City{..}) =
   let
-    fc = m A.! friend
-    fx = 
+    (City fx fy _ _ _ _ _ _) = m A.! friend
+    vx' = ((vx + (fx - x) / 1000) * 0.936)
+    vy' = ((vy + (fy - y) / 1000) * 0.936)
   in
-    City x y friend vx vy idx sands color
+    City (x + vx') (y + vy') friend vx' vy' idx sands color
 
 mkSP :: RandGen SandPainter
 mkSP = do
