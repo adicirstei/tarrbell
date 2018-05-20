@@ -65,16 +65,20 @@ initialModel = do
 
 
 step :: Model -> RandGen Model
-step = pure
+step m =
+  pure $ moveCity m <$> m
 
-render _ = pure $ white 1
+render m = do
+  t <- getRandomR (0,twoPi)
+  
+  pure $ white 1
 
 distance :: City -> City -> Double
 distance (City x y _ _ _ _ _ _) (City x' y' _ _ _ _ _ _) =
   sqrt ((x-x')*(x-x') + (y-y')*(y-y'))
 
---moveCity :: Model -> City -> City
-move m (City{..}) =
+moveCity :: Model -> City -> City
+moveCity m (City{..}) =
   let
     (City fx fy _ _ _ _ _ _) = m A.! friend
     vx' = ((vx + (fx - x) / 1000) * 0.936)
