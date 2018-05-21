@@ -10,6 +10,10 @@ import           Graphics.Rendering.Cairo
 import           Prelude                  hiding (id)
 import qualified UI
 
+import Debug.Trace
+import Data.Monoid((<>))
+
+
 data City = City
   { x      :: Double
   , y      :: Double
@@ -20,13 +24,20 @@ data City = City
   , sands  :: [SandPainter]
   , color  :: ColorFn
   }
-
+instance Show City where
+  show City{..} =
+    "City x: " <> show x <> " y: " <> show y <> " fr: " <> show friend
+--        <> " sands: " <> show sands
 
 data SandPainter = SandPainter
   { p :: Double
   , c :: ColorFn
   , g :: Double
   }
+instance Show SandPainter where
+  show SandPainter{..} =
+    "SP p: " <> show p <> " g: " <> show g
+
 
 type Model = A.Array Integer City
 
@@ -45,6 +56,7 @@ initialModel = do
   let
     mkCity :: Integer -> RandGen City
     mkCity idx = do
+
       ss <- sequence [mkSP, mkSP, mkSP]
       rf <- getRandomR (0, numCities `div` 5)
       let
@@ -57,16 +69,16 @@ initialModel = do
         friend = (idx + rf ) `mod` numCities
         c = City x' y' friend vx' vy' idx ss white
 
-      pure c
+      pure $ trace ("mk:" <> show c) c
 
-  let cc = A.listArray (0, numCities) (mkCity <$> [0..numCities])
+  let cc = A.listArray (0, numCities) (mkCity <$> [0..numCities+1])
   sequence cc
 
 
 
 step :: Model -> RandGen Model
 step m =
-  traverse (moveCity m) m
+  traverse (moveCity m) (trace ("M: " <> show m) m)
 
 render m = do
   rendering <- traverse (renderCity m) m
