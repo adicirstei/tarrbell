@@ -30,7 +30,7 @@ data SandPainter = SandPainter
 
 type Model = A.Array Integer City
 
-numCities = 200
+numCities = 20
 
 main = UI.main "SandTraveler" (World 700 700 1) (UI.basic white) initialModel step render
 
@@ -52,8 +52,8 @@ initialModel = do
         tinc = ot + (1.1 - t / num) * t * 2 * twoPi / num
         vx' = vt * sin tinc
         vy' = vt * cos tinc
-        x' = (fromIntegral w)/2+ 2.0*vx'
-        y' = (fromIntegral h)/2+ 2.0*vy'
+        x' = fromIntegral w/2+ 2.0*vx'
+        y' = fromIntegral h/2+ 2.0*vy'
         friend = (idx + rf ) `mod` numCities
         c = City x' y' friend vx' vy' idx ss white
 
@@ -66,25 +66,60 @@ initialModel = do
 
 step :: Model -> RandGen Model
 step m =
-  pure $ moveCity m <$> m
+  traverse (moveCity m) m
 
 render m = do
-  t <- getRandomR (0,twoPi)
-  
-  pure $ white 1
+  rendering <- traverse (renderCity m) m
+  pure $ sequence rendering
+
+
+
+renderCity :: Model -> City -> RandGen (Render [()])
+renderCity m City{..} = do
+
+  let
+    (City fx fy _ _ _ _ _ fcol) = m A.! friend
+    rendStep :: Int -> RandGen (Render ())
+    rendStep _ = do
+
+      t <- getRandomR (0,twoPi)
+
+      cg <- chance 0.01 (-3 , 3 ) 0
+      cg' <- chance 0.01 (-3 , 3 ) 0
+      dx' <- cg
+      dy' <- cg
+      dx'' <- cg'
+      dy'' <- cg'
+      let
+        dx = (sin t)*(x-fx)/2 + (x + fx)/2
+        dy = (sin t)*(y-fy)/2 + (y + fy)/2
+        draw = do
+          point fcol 0.19 (dx + dx') (dy + dy')
+          point fcol 0.19 (dx'' - (sin t)*(x-fx)/2 + (x + fx)/2) (dy'' - (sin t)*(y-fy)/2 + (y + fy)/2)
+
+      pure draw
+  rendering <- traverse rendStep [1..10]
+  pure $ sequence rendering
+
+
+
+chance :: Rational -> (Double, Double) -> Double -> RandGen (RandGen Double)
+chance p r d = weighted [(getRandomR r, p), (pure d, 1 - p)]
+
 
 distance :: City -> City -> Double
 distance (City x y _ _ _ _ _ _) (City x' y' _ _ _ _ _ _) =
   sqrt ((x-x')*(x-x') + (y-y')*(y-y'))
 
-moveCity :: Model -> City -> City
-moveCity m (City{..}) =
+moveCity :: Model -> City -> RandGen City
+moveCity m City{..} = do
+  s' <- traverse moveSP sands
   let
     (City fx fy _ _ _ _ _ _) = m A.! friend
     vx' = ((vx + (fx - x) / 1000) * 0.936)
     vy' = ((vy + (fy - y) / 1000) * 0.936)
-  in
-    City (x + vx') (y + vy') friend vx' vy' idx sands color
+
+  pure $ City (x + vx') (y + vy') friend vx' vy' idx s' color
 
 mkSP :: RandGen SandPainter
 mkSP = do
@@ -93,6 +128,34 @@ mkSP = do
   g <- getRandomR(0.01, 0.1)
   pure $ SandPainter p c g
 
+renderSP :: SandPainter -> Double -> Double -> Double -> Double -> RandGen (Render [()])
+renderSP SandPainter{..} x y ox oy = do
+  (SandPainter p' c' g') <- moveSP (SandPainter p c g)
+  let
+    w = g' / 10
+    step i = do
+      let
+        i' = fromIntegral i
+        a = 0.1 - i' / 110
+
+      point c a (ox + (x-ox)*sin (p + sin i' * w) ) (oy + (y-oy) * sin (p + sin (i' * w)))
+      point c a (ox + (x-ox)*sin (p - sin i' * w) ) (oy + (y-oy) * sin (p - sin (i' * w)))
+    r10 = traverse step [1..10]
+  pure $ do
+    point c 0.11 (x+ (x-ox)*sin p) (oy + (x-oy)*sin p)
+    r10
+
+
+
+
+moveSP :: SandPainter -> RandGen SandPainter
+moveSP SandPainter{..} = do
+  let maxg = 0.22
+  g' <- getRandomR(-0.05, 0.05)
+  p' <- getRandomR(-0.05, 0.05)
+  pure $ SandPainter
+          (if p + p' <0 then 0 else if p + p' > 1 then 1 else p + p') c
+          (if g + g' < -maxg then -maxg else if g + g' > maxg then maxg else g + g')
 
 
 
