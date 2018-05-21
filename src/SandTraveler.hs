@@ -59,6 +59,7 @@ initialModel = do
 
       ss <- sequence [mkSP, mkSP, mkSP]
       rf <- getRandomR (0, numCities `div` 5)
+      color <- someColorP palette
       let
         t = fromIntegral idx
         tinc = ot + (1.1 - t / num) * t * 2 * twoPi / num
@@ -67,9 +68,10 @@ initialModel = do
         x' = fromIntegral w/2+ 2.0*vx'
         y' = fromIntegral h/2+ 2.0*vy'
         friend = (idx + rf ) `mod` numCities
-        c = City x' y' friend vx' vy' idx ss white
 
-      pure $ trace ("mk:" <> show c) c
+        c = City x' y' friend vx' vy' idx ss color
+
+      pure c
 
   let cc = A.listArray (0, numCities) (mkCity <$> [0..numCities+1])
   sequence cc
@@ -78,7 +80,7 @@ initialModel = do
 
 step :: Model -> RandGen Model
 step m =
-  traverse (moveCity m) (trace ("M: " <> show m) m)
+  traverse (moveCity m) m
 
 render m = do
   rendering <- traverse (renderCity m) m
