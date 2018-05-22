@@ -10,8 +10,8 @@ import           Graphics.Rendering.Cairo
 import           Prelude                  hiding (id)
 import qualified UI
 
-import Debug.Trace
-import Data.Monoid((<>))
+import           Data.Monoid              ((<>))
+import           Debug.Trace
 
 
 data City = City
@@ -41,15 +41,13 @@ instance Show SandPainter where
 
 type Model = A.Array Integer City
 
-numCities = 20
+numCities = 200
 
-main = UI.main "SandTraveler" (World 700 700 1) (UI.basic white) initialModel step render
+main = UI.main "SandTraveler" (World 1000 800 1) (UI.basic white) initialModel step render
 
 initialModel :: RandGen Model
 initialModel = do
   let
-    vt = 4.2 :: Double
-    vvt = 0.2
     num = fromIntegral numCities
   ot <- getRandomR (0, twoPi)
   (w,h) <- getSize
@@ -62,6 +60,8 @@ initialModel = do
       color <- someColorP palette
       let
         t = fromIntegral idx
+
+        vt = 4.2 + 0.2 * t - 0.00033 * t * (t + 1) / 2
         tinc = ot + (1.1 - t / num) * t * 2 * twoPi / num
         vx' = vt * sin tinc
         vy' = vt * cos tinc
